@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useCallback } from "react";
+import React, { useEffect, useContext, useCallback, useState } from "react";
 
 import Header from "./Components/Headers";
 import Products from "./Components/ProductTypes/Products";
@@ -31,13 +31,17 @@ const App = () => {
   }, [dispatch]);
 
   const generateToken = useCallback(
-    async (isPaymentInitiation) => {
+    async (isPaymentInitiation, accessToken = null) => {
       // Link tokens for 'payment_initiation' use a different creation flow in your backend.
+      console.log(accessToken)
       const path = isPaymentInitiation
         ? "/api/create_link_token_for_payment"
         : "/api/create_link_token";
-      const response = await fetch(path, {
+      const response = await fetch(`${path}?access_token=${accessToken}`, {
         method: "POST",
+        body: JSON.stringify({
+          access_token: accessToken,
+        }),
       });
       if (!response.ok) {
         dispatch({ type: "SET_STATE", state: { linkToken: null } });
@@ -56,6 +60,7 @@ const App = () => {
           return;
         }
         dispatch({ type: "SET_STATE", state: { linkToken: data.link_token } });
+        console.log(data.link_token);
       }
       // Save the link_token to be used later in the Oauth flow.
       localStorage.setItem("link_token", data.link_token);
@@ -85,7 +90,7 @@ const App = () => {
   return (
     <div className={styles.App}>
       <div className={styles.container}>
-        <Header />
+        <Header generateToken={generateToken}/>
         {linkSuccess && (
           <>
             {isPaymentInitiation && (

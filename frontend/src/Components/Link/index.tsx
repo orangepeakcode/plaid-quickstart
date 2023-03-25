@@ -1,12 +1,14 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import Button from "plaid-threads/Button";
 
 import Context from "../../Context";
-import {Products} from "plaid";
+import { Products } from "plaid";
 
-const Link = () => {
+const Link = ({ generateToken }: { generateToken: any }) => {
   const { linkToken, isPaymentInitiation, dispatch } = useContext(Context);
+
+  const [access_token, setAccessToken] = useState("");
 
   const onSuccess = React.useCallback(
     (public_token: string) => {
@@ -42,7 +44,7 @@ const Link = () => {
       };
 
       // 'payment_initiation' products do not require the public_token to be exchanged for an access_token.
-      if (isPaymentInitiation){
+      if (isPaymentInitiation) {
         dispatch({ type: "SET_STATE", state: { isItemAccess: false } });
       } else {
         exchangePublicTokenForAccessToken();
@@ -75,10 +77,35 @@ const Link = () => {
     }
   }, [ready, open, isOauth]);
 
+  useEffect(() => {
+    generateToken(
+      undefined,
+      access_token.trim().length === 0 ? null : access_token.trim()
+    );
+  }, [access_token]);
+
   return (
-    <Button type="button" large onClick={() => open()} disabled={!ready}>
-      Launch Link
-    </Button>
+    <>
+      <div style={{ marginBottom: "12px" }}>
+        <label style={{ fontWeight: "bold", marginRight: "12px" }}>
+          Access Token
+        </label>
+        <input
+          onChange={(e) => setAccessToken(e.currentTarget.value || "")}
+          style={{ padding: "4px" }}
+        ></input>
+      </div>
+      <Button
+        type="button"
+        large
+        onClick={() => {
+          open();
+        }}
+        disabled={!ready}
+      >
+        Launch Link
+      </Button>
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ import Context from "../../Context";
 
 import styles from "./index.module.scss";
 
-const Header = () => {
+const Header = ({ generateToken }: { generateToken: any }) => {
   const {
     itemId,
     accessToken,
@@ -85,7 +85,7 @@ const Header = () => {
             </div>
           ) : (
             <div className={styles.linkButton}>
-              <Link />
+              <Link generateToken={generateToken} />
             </div>
           )}
         </>
